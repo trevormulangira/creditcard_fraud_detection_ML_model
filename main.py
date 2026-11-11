@@ -1,16 +1,17 @@
 import pandas as pd
 import numpy as np
+from pathlib import Path
 
-train_df = pd.read_csv(r"C:\Users\HP\OneDrive\Desktop\Mulanjoe\Datasets\creditcard_fraud_detection_legit\archive (2)\train.csv")
-#print(train_df.columns)
-#print(train_df.head())
-#print(train_df.dtypes)
+BASE_DIR = Path(__file__).resolve().parent
+train_path = BASE_DIR /"data"/ "train.csv"
+train_df = pd.read_csv(train_path)
 
                      ###STEP 3###
 X = train_df.drop(columns=["id", "Class", "Time"])
 y = train_df["Class"]
 
-test_df = pd.read_csv(r"C:\Users\HP\OneDrive\Desktop\Mulanjoe\Datasets\creditcard_fraud_detection_legit\archive (2)\test.csv")
+test_path = BASE_DIR /"data"/ "test.csv"
+test_df = pd.read_csv(test_path)
 #print(test_df.columns)
 #print(test_df.head())
 
@@ -63,10 +64,12 @@ import joblib
 best_pipeline = joblib.load('tuned_random_forest_v1.joblib')
 print("Loaded tuned model from disk")
 
+
+
 y_proba_tuned = best_pipeline.predict_proba(X_val)[:, 1]
 
 from ml_utils import evaluate_model #Evaluate the model using the evaluate_model function from ml_utils.py
-#evaluate_model(y_val, y_proba_tuned, threshold=0.5, model_name='0.5 Tuned Model')
+evaluate_model(y_val, y_proba_tuned, threshold=0.7, model_name='0.7 Tuned Model')
 
 from ml_utils import cross_validate_model #Evaluate the model using the cross_validate_model function from ml_utils.py
 #cross_validate_model(best_pipeline, X, y, cv_folds=5)
@@ -77,11 +80,12 @@ FINAL_THRESHOLD = 0.7
 final_predictions = (test_proba >= FINAL_THRESHOLD).astype(int)
 print("PREDICTIONS GENERATED")
 
-submission = pd.read_csv(r"C:\Users\HP\OneDrive\Desktop\Mulanjoe\Datasets\creditcard_fraud_detection_legit\archive (2)\sample_submission.csv")
+submission_path = BASE_DIR /"data"/ "sample_submission.csv"
+submission = pd.read_csv(submission_path)
 
 submission['Class'] = final_predictions
 
-submission.to_csv('my_final_submission.csv', index=False)
+submission.to_csv(BASE_DIR / 'my_final_submission.csv', index=False)
 print("File saved as my_final_submission.csv")
 print("Total test rows:", len(submission))
 print("Predicted Frauds(1s):", submission['Class'].sum())
